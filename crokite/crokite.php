@@ -43,6 +43,19 @@ class wp_my_plugin extends WP_Widget {
 		return $instance;
 	}
 
+	function get_xml_from_url($url){
+	    $ch = curl_init();
+
+	    curl_setopt($ch, CURLOPT_URL, $url);
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
+
+	    $xmlstr = curl_exec($ch);
+	    curl_close($ch);
+
+	    return $xmlstr;
+	}	
+
 	// Display widget ...
 	function widget($args, $instance) {
 		// Get options
@@ -63,6 +76,21 @@ class wp_my_plugin extends WP_Widget {
 	        foreach ($display_kills as $kill) {
 	            echo "<div class='kill-outer'>";
 	            $kill_url = 'https://zkillboard.com/kill/'.$kill['killID'].'/';
+
+	            // Use the character ID from the zkillboard API to look up the ship name from the EVE XML api.
+	            $killed_ship_id = $kill['victim']['shipTypeID'];
+            	$xml_url = 'http://api.eveonline.com/eve/TypeName.xml.aspx?ids='.$killed_ship_id;
+            	$xmlstr = simplexml_load_file($xml_url);
+            	$ship_type_string = $xmlstr->result->rowset[0]->row['typeName'];
+
+            	// Use the ID to get the ship image from the image server...
+
+            	$image_url = "https://image.eveonline.com/Type/".$killed_ship_id."_64.png";
+            	echo "<div>";
+            	echo "<a href='$kill_url'>";
+            	echo "<img src='$image_url'>";
+            	echo "</a>";
+            	echo "</div>";
             	echo "<a href='$kill_url'>";
 	            
 	            if ($kill['victim']['characterName'] == "") {
@@ -74,7 +102,7 @@ class wp_my_plugin extends WP_Widget {
 	            echo "</a>";
 
 	            echo "<br />";
-	            echo "Shiptype: ".$kill['victim']['shipTypeID'];
+	            echo "Shiptype: ".$ship_type_string;
 	            echo "<br />";
 	            echo "Damage Taken: ".$kill['victim']['damageTaken'];
 
