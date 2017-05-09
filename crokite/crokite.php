@@ -59,6 +59,7 @@ class wp_my_plugin extends WP_Widget {
    		// Otherwise iterate through stored kills and display them
    		else {
    			$display_kills = $instance['kills'];
+   			echo "<h3>Latest kills for ".$instance['character_id']."</h3>";   			
 	        foreach ($display_kills as $kill) {
 	            echo "<div class='kill-outer'>";
 	            $kill_url = 'https://zkillboard.com/kill/'.$kill['killID'].'/';
@@ -71,6 +72,12 @@ class wp_my_plugin extends WP_Widget {
 	            }
 
 	            echo "</a>";
+
+	            echo "<br />";
+	            echo "Shiptype: ".$kill['victim']['shipTypeID'];
+	            echo "<br />";
+	            echo "Damage Taken: ".$kill['victim']['damageTaken'];
+
 	            echo "</div>";
 	            echo "<br />";
 	        }
